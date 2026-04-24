@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Page</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <div class="clock-block">
+        <h1 id="clock-time">00:00</h1>
+        <p id="clock-date">Loading date</p>
+      </div>
+      <details class="top-menu">
+        <summary class="top-menu-button" aria-label="Page options">
+          <span></span>
+          <span></span>
+          <span></span>
+        </summary>
+        <div class="top-menu-list">
+          <button type="button" class="menu-item" id="import-button">Import bookmarks</button>
+          <button type="button" class="menu-item" id="list-view-button">List view</button>
+          <button type="button" class="menu-item" id="categories-button">Categories</button>
+          <button type="button" class="menu-item" id="settings-button">Settings</button>
+        </div>
+      </details>
+      <input id="bookmark-file" type="file" accept=".html,.htm,text/html" hidden>
+      <input id="list-csv-file" type="file" accept=".csv,text/csv" hidden>
+    </header>
+
+    <section class="grid-wrap">
+      <div id="link-grid" class="link-grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <template id="tile-template">
+    <article class="tile" draggable="true">
+      <div class="tile-menu-wrap">
+        <details class="tile-menu">
+          <summary class="tile-menu-button" aria-label="Tile options">
+            <span></span>
+            <span></span>
+            <span></span>
+          </summary>
+          <div class="tile-menu-list">
+            <button type="button" class="menu-item edit">Edit</button>
+            <button type="button" class="menu-item delete danger">Delete</button>
+          </div>
+        </details>
+      </div>
+      <a class="tile-link" target="_blank" rel="noreferrer"></a>
+    </article>
+  </template>
+
+  <template id="import-item-template">
+    <label class="import-item">
+      <input type="checkbox" class="import-check" checked>
+      <span class="import-copy">
+        <strong class="import-name"></strong>
+        <small class="import-url"></small>
+      </span>
+    </label>
+  </template>
+
+  <dialog id="link-dialog">
+    <form method="dialog" class="dialog-card" id="link-form">
+      <div class="dialog-head">
+        <h2 id="link-dialog-title">Add link</h2>
+        <button type="button" class="icon-button" data-close-dialog="link-dialog" aria-label="Close dialog">Close</button>
+      </div>
+      <label class="stacked">
+        <span>Name</span>
+        <input id="link-name" name="link-name" type="text" maxlength="40" required>
+      </label>
+      <label class="stacked">
+        <span>URL</span>
+        <input id="link-url" name="link-url" type="url" required>
+      </label>
+      <label class="stacked">
+        <span>Category</span>
+        <select id="link-category" name="link-category"></select>
+      </label>
+      <menu class="dialog-actions">
+        <button type="button" class="toolbar-button subtle" data-close-dialog="link-dialog">Cancel</button>
+        <button type="submit" class="toolbar-button" value="save">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="settings-dialog">
+    <form method="dialog" class="dialog-card" id="settings-form">
+      <div class="dialog-head">
+        <h2>Settings</h2>
+        <button type="button" class="icon-button" data-close-dialog="settings-dialog" aria-label="Close dialog">Close</button>
+      </div>
+      <div class="settings-grid">
+        <label class="stacked">
+          <span>Background color</span>
+          <input id="setting-background" type="color" value="#0b1020">
+        </label>
+        <label class="stacked">
+          <span>Accent color</span>
+          <input id="setting-accent" type="color" value="#72e2ae">
+        </label>
+        <label class="stacked">
+          <span>Panel color</span>
+          <input id="setting-panel" type="color" value="#0f1a34">
+        </label>
+        <label class="stacked">
+          <span>Page width</span>
+          <input id="setting-width" type="range" min="860" max="1800" step="10" value="1280">
+        </label>
+        <label class="stacked">
+          <span>Tile gap horizontal</span>
+          <input id="setting-gap-x" type="range" min="8" max="40" step="1" value="18">
+        </label>
+        <label class="stacked">
+          <span>Tile gap vertical</span>
+          <input id="setting-gap-y" type="range" min="8" max="40" step="1" value="18">
+        </label>
+        <label class="stacked">
+          <span>Tab scale</span>
+          <input id="setting-tab-scale" type="range" min="0.5" max="1" step="0.05" value="1">
+        </label>
+      </div>
+      <div class="settings-readout" id="settings-readout"></div>
+      <menu class="dialog-actions">
+        <button type="button" class="toolbar-button subtle" id="reset-settings">Reset settings</button>
+        <button type="submit" class="toolbar-button" value="save">Done</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="categories-dialog">
+    <form method="dialog" class="dialog-card categories-card" id="categories-form">
+      <div class="dialog-head">
+        <h2>Categories</h2>
+        <button type="button" class="icon-button" data-close-dialog="categories-dialog" aria-label="Close dialog">Close</button>
+      </div>
+      <section class="category-settings">
+        <div id="category-list" class="category-list"></div>
+        <div class="category-builder">
+          <label class="stacked">
+            <span>Name</span>
+            <input id="new-category-name" type="text" maxlength="24" placeholder="Work">
+          </label>
+          <label class="stacked">
+            <span>Tile color</span>
+            <input id="new-category-color" type="color" value="#4d7fff">
+          </label>
+        </div>
+        <div class="category-actions">
+          <button type="button" class="toolbar-button subtle" id="add-category">Add category</button>
+        </div>
+      </section>
+      <menu class="dialog-actions">
+        <button type="submit" class="toolbar-button" value="done">Done</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="import-dialog">
+    <form method="dialog" class="dialog-card import-card" id="import-form">
+      <div class="dialog-head">
+        <h2>Import bookmarks</h2>
+        <button type="button" class="icon-button" data-close-dialog="import-dialog" aria-label="Close dialog">Close</button>
+      </div>
+      <p class="dialog-copy">Choose which bookmarks to bring in from your exported browser bookmarks file.</p>
+      <div class="import-tools">
+        <button type="button" class="toolbar-button subtle" id="select-all-imports">Select all</button>
+        <button type="button" class="toolbar-button subtle" id="clear-imports">Clear all</button>
+      </div>
+      <div id="import-list" class="import-list"></div>
+      <menu class="dialog-actions">
+        <button type="button" class="toolbar-button subtle" data-close-dialog="import-dialog">Cancel</button>
+        <button type="submit" class="toolbar-button" value="import">Import selected</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="list-view-dialog">
+    <form method="dialog" class="dialog-card list-view-card" id="list-view-form">
+      <div class="dialog-head">
+        <h2>List view</h2>
+        <button type="button" class="icon-button" data-close-dialog="list-view-dialog" aria-label="Close dialog">Close</button>
+      </div>
+      <div class="list-view-tools">
+        <button type="button" class="toolbar-button subtle" id="list-add-row">Add link</button>
+        <button type="button" class="toolbar-button subtle" id="list-import-csv">Import CSV</button>
+        <button type="button" class="toolbar-button subtle" id="list-export-csv">Export CSV</button>
+      </div>
+      <div class="list-view-table">
+        <div class="list-view-head">
+          <span>Icon</span>
+          <span>Title</span>
+          <span>URL</span>
+          <span>Category</span>
+          <span>Action</span>
+        </div>
+        <div id="list-view-rows" class="list-view-rows"></div>
+      </div>
+      <menu class="dialog-actions">
+        <button type="button" class="toolbar-button subtle" data-close-dialog="list-view-dialog">Cancel</button>
+        <button type="submit" class="toolbar-button" value="save">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="icon-dialog">
+    <form method="dialog" class="dialog-card" id="icon-form">
+      <div class="dialog-head">
+        <h2>Edit icon</h2>
+        <button type="button" class="icon-button" data-close-dialog="icon-dialog" aria-label="Close dialog">Close</button>
+      </div>
+      <div class="icon-editor">
+        <div class="icon-preview-wrap">
+          <img id="icon-preview" class="icon-preview" alt="Icon preview">
+        </div>
+        <label class="stacked">
+          <span>Icon URL</span>
+          <input id="icon-url" name="icon-url" type="url" placeholder="https://example.com/icon.png">
+        </label>
+        <input id="icon-file" type="file" accept="image/*" hidden>
+        <div class="list-view-tools">
+          <button type="button" class="toolbar-button subtle" id="icon-select-file">Select image</button>
+          <button type="button" class="toolbar-button subtle" id="icon-reset">Use site favicon</button>
+        </div>
+      </div>
+      <menu class="dialog-actions">
+        <button type="button" class="toolbar-button subtle" data-close-dialog="icon-dialog">Cancel</button>
+        <button type="submit" class="toolbar-button" value="save">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
