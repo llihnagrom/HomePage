@@ -1,5 +1,10 @@
 const STORAGE_KEY = "local-homepage-links";
 const SETTINGS_KEY = "local-homepage-settings";
+const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || "2026-04-27";
+const UPDATE_CONFIG = {
+  repository: "llihnagrom/HomePage",
+  branch: "main"
+};
 
 const DEFAULT_COLOR = "#4d7fff";
 
@@ -46,6 +51,11 @@ const importButton = document.querySelector("#import-button");
 const listViewButton = document.querySelector("#list-view-button");
 const categoriesButton = document.querySelector("#categories-button");
 const settingsButton = document.querySelector("#settings-button");
+const checkUpdatesButton = document.querySelector("#check-updates-button");
+const updatePanel = document.querySelector("#update-panel");
+const updateTitle = document.querySelector("#update-title");
+const updateMessage = document.querySelector("#update-message");
+const downloadUpdateButton = document.querySelector("#download-update-button");
 const bookmarkFileInput = document.querySelector("#bookmark-file");
 const listCsvFileInput = document.querySelector("#list-csv-file");
 const topMenu = document.querySelector(".top-menu");
@@ -258,6 +268,131 @@ function hexToRgb(hex) {
 function getCategoryColor(categoryName, fallbackColor = DEFAULT_COLOR) {
   const match = settings.categories.find((category) => category.name === categoryName);
   return match?.color || fallbackColor;
+}
+
+function getConfiguredUpdateSource() {
+  if (UPDATE_CONFIG.repository) {
+    return {
+      repository: UPDATE_CONFIG.repository,
+      branch: UPDATE_CONFIG.branch || "main"
+    };
+  }
+
+  const githubPagesMatch = window.location.hostname.match(/^([a-z\d-]+)\.github\.io$/i);
+  if (!githubPagesMatch) {
+    return null;
+  }
+
+  const owner = githubPagesMatch[1];
+  const repo = window.location.pathname.split("/").filter(Boolean)[0] || `${owner}.github.io`;
+  return {
+    repository: `${owner}/${repo}`,
+    branch: UPDATE_CONFIG.branch || "main"
+  };
+}
+
+function compareVersion(left, right) {
+  return String(left).localeCompare(String(right), undefined, {
+    numeric: true,
+    sensitivity: "base"
+  });
+}
+
+function setUpdateState(title, message, downloadUrl = "") {
+  if (!updatePanel || !updateTitle || !updateMessage || !downloadUpdateButton) {
+    return;
+  }
+
+  updatePanel.hidden = false;
+  updateTitle.textContent = title;
+  updateMessage.textContent = message;
+  downloadUpdateButton.hidden = !downloadUrl;
+  downloadUpdateButton.onclick = downloadUrl
+    ? () => window.open(downloadUrl, "_blank", "noopener")
+    : null;
+}
+
+async function getDefaultBranch(repository, fallbackBranch) {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${repository}`, {
+      headers: { Accept: "application/vnd.github+json" },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return fallbackBranch;
+    }
+
+    const repo = await response.json();
+    return repo.default_branch || fallbackBranch;
+  } catch {
+    return fallbackBranch;
+  }
+}
+
+async function checkForUpdates({ silent = false } = {}) {
+  const source = getConfiguredUpdateSource();
+  if (!source) {
+    if (silent) {
+      return;
+    }
+
+    setUpdateState(
+      "Update source not set",
+      "Add your GitHub repository name to UPDATE_CONFIG.repository in script.js."
+    );
+    return;
+  }
+
+  if (!silent) {
+    setUpdateState("Checking for updates", "Looking at GitHub for the newest version.");
+  }
+
+  try {
+    const branch = await getDefaultBranch(source.repository, source.branch);
+    const rawUrl = `https://raw.githubusercontent.com/${source.repository}/${branch}/index.html?cache=${Date.now()}`;
+    const response = await fetch(rawUrl, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error(`GitHub returned ${response.status}`);
+    }
+
+    const html = await response.text();
+    const versionMatch = html.match(/<meta\s+name=["']app-version["']\s+content=["']([^"']+)["']/i);
+    const latestVersion = versionMatch?.[1];
+
+    if (!latestVersion) {
+      setUpdateState(
+        "GitHub copy is not versioned yet",
+        "Upload this updated local copy to GitHub once. After that, future update checks can compare versions."
+      );
+      return;
+    }
+
+    if (compareVersion(APP_VERSION, latestVersion) < 0) {
+      const downloadUrl = `https://github.com/${source.repository}/archive/refs/heads/${branch}.zip`;
+      setUpdateState(
+        "Update available",
+        `This copy is ${APP_VERSION}. GitHub has ${latestVersion}.`,
+        downloadUrl
+      );
+      return;
+    }
+
+    if (!silent) {
+      setUpdateState("Up to date", `This copy is ${APP_VERSION}.`);
+    }
+  } catch (error) {
+    console.warn("Unable to check for updates.", error);
+    if (silent) {
+      return;
+    }
+
+    setUpdateState(
+      "Could not check for updates",
+      "GitHub may be unavailable, the repository may be private, or the repository setting may need updating."
+    );
+  }
 }
 
 function renderCategoryOptions() {
@@ -1091,6 +1226,13 @@ importButton.addEventListener("click", () => {
   bookmarkFileInput.click();
 });
 
+checkUpdatesButton?.addEventListener("click", () => {
+  if (topMenu?.open) {
+    topMenu.removeAttribute("open");
+  }
+  checkForUpdates();
+});
+
 document.querySelectorAll("[data-close-dialog]").forEach((button) => {
   button.addEventListener("click", () => {
     const dialogId = button.getAttribute("data-close-dialog");
@@ -1242,3 +1384,4 @@ applySettings();
 updateClock();
 setInterval(updateClock, 1000);
 renderLinks();
+checkForUpdates({ silent: true });

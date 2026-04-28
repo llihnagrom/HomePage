@@ -118,6 +118,33 @@ button {
   padding: 4px 0;
 }
 
+.update-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(var(--panel-rgb), 0.76);
+  box-shadow: var(--shadow);
+}
+
+.update-panel[hidden] {
+  display: none;
+}
+
+.update-panel strong,
+.update-panel p {
+  margin: 0;
+}
+
+.update-panel p {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
 .link-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(calc(var(--tile-min) * var(--tile-scale)), 1fr));
@@ -695,7 +722,8 @@ dialog::backdrop {
 
   .dialog-actions,
   .import-tools,
-  .list-view-tools {
+  .list-view-tools,
+  .update-panel {
     flex-wrap: wrap;
   }
 

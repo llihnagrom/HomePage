@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="app-version" content="2026-04-27">
   <title>Home Page</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -23,6 +24,7 @@
           <button type="button" class="menu-item" id="import-button">Import bookmarks</button>
           <button type="button" class="menu-item" id="list-view-button">List view</button>
           <button type="button" class="menu-item" id="categories-button">Categories</button>
+          <button type="button" class="menu-item" id="check-updates-button">Check updates</button>
           <button type="button" class="menu-item" id="settings-button">Settings</button>
         </div>
       </details>
@@ -31,6 +33,13 @@
     </header>
 
     <section class="grid-wrap">
+      <div class="update-panel" id="update-panel" hidden>
+        <div>
+          <strong id="update-title">Checking for updates</strong>
+          <p id="update-message">Looking at GitHub for the newest version.</p>
+        </div>
+        <button type="button" class="toolbar-button" id="download-update-button" hidden>Download update</button>
+      </div>
       <div id="link-grid" class="link-grid" aria-live="polite"></div>
     </section>
   </main>
