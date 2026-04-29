@@ -46,6 +46,7 @@ homepage-launch:
 The launcher files are:
 
 - `homepage_launcher.py`
+- `homepage_launcher.exe`
 - `install_homepage_launcher.ps1`
 
 The protocol has already been registered for the current Windows user. To register it again after moving the project folder, run PowerShell:
@@ -62,13 +63,15 @@ The first time a browser opens a folder or app tile, it may ask for permission t
 - `.exe`, `.lnk`, `.url`, and `.appref-ms` targets are launched with Windows.
 - The launcher only opens local file targets passed from the homepage.
 - If a path no longer exists, the launcher shows a small error dialog.
+- Normal use does not require Python when `homepage_launcher.exe` is present.
 
 ## Files
 
 - `index.html` - page markup and dialogs.
 - `styles.css` - visual styling and responsive layout.
 - `script.js` - tiles, settings, import/export, update check, and launch-link behavior.
-- `homepage_launcher.py` - Windows launcher for local folders and apps.
+- `homepage_launcher.py` - source for the Windows launcher.
+- `homepage_launcher.exe` - standalone Windows launcher used by the protocol handler.
 - `install_homepage_launcher.ps1` - registers the `homepage-launch:` protocol for the current user.
 
 ## Troubleshooting
@@ -76,7 +79,7 @@ The first time a browser opens a folder or app tile, it may ask for permission t
 If folder or app tiles do not open:
 
 1. Re-run `install_homepage_launcher.ps1`.
-2. Check that Python still exists at the path shown by the installer.
+2. Check that `homepage_launcher.exe` exists beside `install_homepage_launcher.ps1`.
 3. Check that the folder, app, or shortcut path still exists.
 4. If the browser asks whether to open `homepage-launch`, allow it.
 
