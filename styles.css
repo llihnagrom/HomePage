@@ -56,7 +56,7 @@ button {
 .page-header {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 18px;
   margin-bottom: 24px;
 }
@@ -85,6 +85,46 @@ button {
   margin-top: 8px;
   color: var(--muted);
   font-size: 1rem;
+}
+
+.google-search {
+  display: flex;
+  align-items: center;
+  flex: 0 1 420px;
+  min-width: 260px;
+  margin: 8px auto 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.google-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #17213a;
+  padding: 14px 16px;
+  outline: none;
+}
+
+.google-search input::placeholder {
+  color: #6c758b;
+}
+
+.google-search button {
+  align-self: stretch;
+  padding: 0 18px;
+  background: color-mix(in srgb, var(--accent) 88%, white);
+  color: #07140d;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.google-search:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 72%, white);
 }
 
 .toolbar-button,
@@ -643,6 +683,7 @@ dialog::backdrop {
 
 .top-menu {
   position: relative;
+  margin-left: auto;
 }
 
 .top-menu[open] .top-menu-button {
@@ -709,6 +750,14 @@ dialog::backdrop {
 
   .page-header {
     align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .google-search {
+    order: 3;
+    flex-basis: 100%;
+    min-width: 0;
+    margin-top: 0;
   }
 
   .settings-grid {

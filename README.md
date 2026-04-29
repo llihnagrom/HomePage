@@ -1,54 +1,83 @@
 # HomePage
 
-A customizable browser start page for keeping favorite links in a clean tile grid.
-
-HomePage is a static HTML, CSS, and JavaScript project. It runs entirely in the browser, stores your links and settings in `localStorage`, and does not require a backend or build step.
+A local browser home page for quick access to websites, folders, apps, and shortcuts.
 
 ## Features
 
-- Live clock and date header
-- Editable link tiles with favicons
-- Drag-and-drop tile ordering
-- Custom categories with per-category colors
-- Browser bookmark HTML import
-- List view for bulk editing links
-- CSV import and export from list view
-- Custom icon support through image URLs or uploaded files
-- Theme controls for background, accent, panel color, width, spacing, and tile scale
+- Live clock and date.
+- Centered Google search that opens results in a new tab.
+- Bookmark-style tiles with editable names, URLs, categories, colors, and icons.
+- Import browser bookmarks from an exported `.html` file.
+- List view for bulk editing links.
+- CSV import/export for homepage links.
+- Custom categories and page layout settings.
+- Update check against the configured GitHub repository.
+- Local folder and app launching through the `homepage-launch:` Windows protocol.
 
-## Run Locally
+## Add Links
 
-Open `index.html` in a browser.
+Use the plus tile, or open `Page options > List view`.
 
-No install step is needed. The project is made of:
+The `URL, folder, or app path` field accepts:
 
-- `index.html` - page structure and dialogs
-- `styles.css` - layout, theme, and responsive styling
-- `script.js` - app state, imports, exports, editing, and persistence
-
-## Data Storage
-
-Links and settings are stored in the browser under these `localStorage` keys:
-
-- `local-homepage-links`
-- `local-homepage-settings`
-
-Because the data is local to the browser, use CSV export or browser bookmark export if you want a portable backup.
-
-## Importing Bookmarks
-
-Use the page menu and choose **Import bookmarks**, then select an exported browser bookmarks file (`.html` or `.htm`). HomePage will show the discovered bookmarks so you can choose which ones to add.
-
-## CSV Format
-
-The list view can import and export CSV rows with these fields:
-
-```csv
-Icon,Title,URL,Category
+```text
+https://example.com
+I:\HomePage
+C:\Users\morganh\Documents
+\\server\share\folder
+C:\Program Files\Some App\App.exe
+C:\Users\morganh\Desktop\Some Shortcut.lnk
 ```
 
-The icon value can be blank, an image URL, or a data URL.
+Website links open normally in the browser. Folder links open in File Explorer. App paths and shortcuts launch through Windows.
 
-## GitHub Pages
+## Google Search
 
-This project can be hosted directly with GitHub Pages because it is a static site. Set Pages to deploy from the `main` branch and the repository root.
+Type a search in the white search box beside the clock and press `Enter` or `Go`. Results open in a new browser tab.
+
+## Folder And App Launcher
+
+Folder and app launching uses a local Windows protocol handler:
+
+```text
+homepage-launch:
+```
+
+The launcher files are:
+
+- `homepage_launcher.py`
+- `install_homepage_launcher.ps1`
+
+The protocol has already been registered for the current Windows user. To register it again after moving the project folder, run PowerShell:
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File "I:\HomePage\install_homepage_launcher.ps1"
+```
+
+The first time a browser opens a folder or app tile, it may ask for permission to open `homepage-launch`. Allow it to continue.
+
+## Launcher Notes
+
+- Folders are opened with File Explorer.
+- `.exe`, `.lnk`, `.url`, and `.appref-ms` targets are launched with Windows.
+- The launcher only opens local file targets passed from the homepage.
+- If a path no longer exists, the launcher shows a small error dialog.
+
+## Files
+
+- `index.html` - page markup and dialogs.
+- `styles.css` - visual styling and responsive layout.
+- `script.js` - tiles, settings, import/export, update check, and launch-link behavior.
+- `homepage_launcher.py` - Windows launcher for local folders and apps.
+- `install_homepage_launcher.ps1` - registers the `homepage-launch:` protocol for the current user.
+
+## Troubleshooting
+
+If folder or app tiles do not open:
+
+1. Re-run `install_homepage_launcher.ps1`.
+2. Check that Python still exists at the path shown by the installer.
+3. Check that the folder, app, or shortcut path still exists.
+4. If the browser asks whether to open `homepage-launch`, allow it.
+
+If a website tile opens incorrectly, make sure it starts with `https://` or `http://`.

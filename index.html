@@ -14,6 +14,11 @@
         <h1 id="clock-time">00:00</h1>
         <p id="clock-date">Loading date</p>
       </div>
+      <form class="google-search" action="https://www.google.com/search" method="get" target="_blank" role="search">
+        <label class="sr-only" for="google-query">Search Google</label>
+        <input id="google-query" name="q" type="search" autocomplete="off" placeholder="Search Google">
+        <button type="submit" aria-label="Search Google">Go</button>
+      </form>
       <details class="top-menu">
         <summary class="top-menu-button" aria-label="Page options">
           <span></span>
@@ -84,8 +89,8 @@
         <input id="link-name" name="link-name" type="text" maxlength="40" required>
       </label>
       <label class="stacked">
-        <span>URL</span>
-        <input id="link-url" name="link-url" type="url" required>
+        <span>URL, folder, or app path</span>
+        <input id="link-url" name="link-url" type="text" placeholder="https://example.com, I:\Folder, or C:\App\app.exe" required>
       </label>
       <label class="stacked">
         <span>Category</span>

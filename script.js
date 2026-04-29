@@ -7,6 +7,8 @@ const UPDATE_CONFIG = {
 };
 
 const DEFAULT_COLOR = "#4d7fff";
+const FOLDER_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23f5c451' d='M6 16a6 6 0 0 1 6-6h14l6 7h20a6 6 0 0 1 6 6v25a6 6 0 0 1-6 6H12a6 6 0 0 1-6-6z'/%3E%3Cpath fill='%23ffd978' d='M6 25h52v23a6 6 0 0 1-6 6H12a6 6 0 0 1-6-6z'/%3E%3C/svg%3E";
+const APP_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='44' height='44' x='10' y='10' rx='12' fill='%2384d7ff'/%3E%3Cpath fill='%230b1020' d='M23 21h18v5H28v4h11v5H28v8h-5z'/%3E%3C/svg%3E";
 
 const DEFAULT_LINKS = [
   { id: crypto.randomUUID(), name: "Gmail", url: "https://mail.google.com", category: "Mail", color: "#5b8cff" },
@@ -223,16 +225,70 @@ function normalizeUrl(value) {
     return "";
   }
 
-  const withProtocol = /^[a-z][a-z\d+\-.]*:\/\//i.test(trimmed)
+  if (isWindowsPath(trimmed)) {
+    return windowsPathToFileUrl(trimmed);
+  }
+
+  const withProtocol = /^[a-z][a-z\d+\-.]*:/i.test(trimmed)
     ? trimmed
     : `https://${trimmed}`;
 
   return new URL(withProtocol).toString();
 }
 
+function isWindowsPath(value) {
+  return /^[a-z]:[\\/]/i.test(value) || /^\\\\[^\\]+\\[^\\]+/.test(value);
+}
+
+function encodeUrlPath(path) {
+  return path
+    .split("/")
+    .map((segment, index) => (index === 0 && /^[a-z]:$/i.test(segment) ? segment : encodeURIComponent(segment)))
+    .join("/");
+}
+
+function windowsPathToFileUrl(value) {
+  const normalized = value.replaceAll("\\", "/");
+
+  if (normalized.startsWith("//")) {
+    const parts = normalized.slice(2).split("/");
+    const host = parts.shift();
+    if (!host || !parts.length) {
+      throw new Error("Invalid folder path");
+    }
+    return new URL(`file://${host}/${encodeUrlPath(parts.join("/"))}`).toString();
+  }
+
+  return new URL(`file:///${encodeUrlPath(normalized)}`).toString();
+}
+
+function isFileLink(url) {
+  return /^file:/i.test(url);
+}
+
+function isAppFileLink(url) {
+  try {
+    const path = decodeURIComponent(new URL(url).pathname);
+    return /\.(exe|lnk|url|appref-ms)$/i.test(path);
+  } catch {
+    return false;
+  }
+}
+
+function getTileHref(url) {
+  if (isFileLink(url || "")) {
+    return `homepage-launch://open?target=${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 function shortHost(url) {
   try {
-    return new URL(url).hostname.replace(/^www\./, "");
+    const parsed = new URL(url);
+    if (parsed.protocol === "file:") {
+      return decodeURIComponent(parsed.pathname.split("/").filter(Boolean).pop() || parsed.hostname || url);
+    }
+    return parsed.hostname.replace(/^www\./, "");
   } catch {
     return url;
   }
@@ -243,6 +299,9 @@ function faviconUrl(url) {
 }
 
 function getLinkIconSrc(link) {
+  if (!link.customIcon && isFileLink(link.url || "")) {
+    return isAppFileLink(link.url) ? APP_ICON : FOLDER_ICON;
+  }
   return link.customIcon || faviconUrl(link.url || "https://example.com");
 }
 
@@ -549,7 +608,7 @@ function renderLinks() {
     tile.style.setProperty("--tile-color", getCategoryColor(link.category, link.color || DEFAULT_COLOR));
     tile.draggable = true;
 
-    tileLink.href = link.url;
+    tileLink.href = getTileHref(link.url);
     tileLink.innerHTML = [
       '<div class="tile-top">',
       `<img class="favicon" src="${escapeHtml(getLinkIconSrc(link))}" alt="">`,
@@ -609,7 +668,7 @@ function renderListViewRows() {
     row.innerHTML = [
       `<div class="list-icon-cell" title="Double-click to edit icon"><img class="list-favicon" src="${escapeHtml(getLinkIconSrc(link))}" alt=""></div>`,
       `<input type="text" class="list-input" data-field="name" placeholder="Title" value="${escapeHtml(link.name)}">`,
-      `<input type="url" class="list-input" data-field="url" placeholder="https://example.com" value="${escapeHtml(link.url)}">`,
+      `<input type="text" class="list-input" data-field="url" placeholder="https://example.com, I:\\Folder, or C:\\App\\app.exe" value="${escapeHtml(link.url)}">`,
       `<select class="list-input" data-field="category">${categorySelectMarkup(link.category)}</select>`,
       '<button type="button" class="toolbar-button subtle list-delete">Delete</button>'
     ].join("");
@@ -712,7 +771,7 @@ function collectListViewRows() {
       normalizedUrl = normalizeUrl(urlValue);
       urlInput.setCustomValidity("");
     } catch {
-      urlInput.setCustomValidity("Please enter a valid URL.");
+      urlInput.setCustomValidity("Please enter a valid URL, folder path, or app path.");
       urlInput.reportValidity();
       return null;
     }
@@ -1085,7 +1144,7 @@ linkForm.addEventListener("submit", (event) => {
     }
     linkDialog.close();
   } catch {
-    linkUrlInput.setCustomValidity("Please enter a valid URL.");
+    linkUrlInput.setCustomValidity("Please enter a valid URL, folder path, or app path.");
     linkUrlInput.reportValidity();
   }
 });
