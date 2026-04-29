@@ -11,8 +11,9 @@
   --muted: #9fb0d9;
   --line: rgba(190, 208, 255, 0.14);
   --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
-  --radius: 24px;
+  --radius: 20px;
   --tile-min: 168px;
+  --tile-height: 118px;
   --tile-scale: 1;
 }
 
@@ -196,7 +197,7 @@ button {
 .tile,
 .add-tile {
   position: relative;
-  min-height: calc(154px * var(--tile-scale));
+  min-height: calc(var(--tile-height) * var(--tile-scale));
   border-radius: var(--radius);
   background: rgba(var(--panel-rgb), 0.82);
   border: 1px solid var(--line);
@@ -225,8 +226,9 @@ button {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: calc(154px * var(--tile-scale));
-  padding: calc(18px * var(--tile-scale));
+  height: 100%;
+  min-height: calc(var(--tile-height) * var(--tile-scale));
+  padding: calc(12px * var(--tile-scale)) calc(16px * var(--tile-scale));
   text-decoration: none;
   color: var(--text);
   background:
@@ -239,7 +241,7 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(14px * var(--tile-scale));
+  gap: calc(10px * var(--tile-scale));
   width: 100%;
 }
 
@@ -290,8 +292,8 @@ button {
 
 .tile-menu-wrap {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 10px;
   z-index: 2;
 }
 
