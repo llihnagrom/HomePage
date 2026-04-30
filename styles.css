@@ -290,71 +290,12 @@ button {
   background: var(--tile-color, var(--accent));
 }
 
-.tile-menu-wrap {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  z-index: 2;
-}
-
-.tile-menu {
-  position: relative;
-}
-
-.tile-menu[open] .tile-menu-button {
-  background: transparent;
-}
-
-.tile-menu-button {
-  list-style: none;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 28px;
-  height: 40px;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-
-.tile-menu-button::-webkit-details-marker {
-  display: none;
-}
-
-.tile-menu-button span {
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--text);
-  display: block;
-}
-
-.tile-menu-list {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 132px;
-  padding: 8px;
-  border-radius: 16px;
-  background: rgba(8, 14, 28, 0.96);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-}
-
 .menu-item {
   width: 100%;
   padding: 10px 12px;
   text-align: left;
   background: transparent;
   color: var(--text);
-}
-
-.menu-item.danger {
-  color: #ff8d8d;
 }
 
 .add-tile {

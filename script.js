@@ -558,10 +558,6 @@ function applySettings() {
 }
 
 function closeAllMenus() {
-  document.querySelectorAll(".tile-menu[open]").forEach((menu) => {
-    menu.removeAttribute("open");
-  });
-
   if (topMenu?.open) {
     topMenu.removeAttribute("open");
   }
@@ -600,9 +596,6 @@ function renderLinks() {
     const fragment = tileTemplate.content.cloneNode(true);
     const tile = fragment.querySelector(".tile");
     const tileLink = fragment.querySelector(".tile-link");
-    const editButton = fragment.querySelector(".edit");
-    const deleteButton = fragment.querySelector(".delete");
-    const menu = fragment.querySelector(".tile-menu");
 
     tile.dataset.id = link.id;
     tile.style.setProperty("--tile-color", getCategoryColor(link.category, link.color || DEFAULT_COLOR));
@@ -623,26 +616,6 @@ function renderLinks() {
     tile.addEventListener("drop", handleDrop);
     tile.addEventListener("dragend", handleDragEnd);
     tile.addEventListener("dragleave", () => tile.classList.remove("drag-over"));
-
-    editButton.addEventListener("click", () => {
-      closeAllMenus();
-      openLinkDialog("edit", link.id);
-    });
-
-    deleteButton.addEventListener("click", () => {
-      closeAllMenus();
-      deleteLink(link.id);
-    });
-
-    menu.addEventListener("toggle", () => {
-      if (menu.open) {
-        document.querySelectorAll(".tile-menu").forEach((otherMenu) => {
-          if (otherMenu !== menu) {
-            otherMenu.removeAttribute("open");
-          }
-        });
-      }
-    });
 
     linkGrid.append(fragment);
   });
@@ -961,12 +934,6 @@ function updateLink(id, changes) {
       ? normalizeLinkRecord({ ...link, ...changes })
       : link
   ));
-  saveLinks();
-  renderLinks();
-}
-
-function deleteLink(id) {
-  links = links.filter((link) => link.id !== id);
   saveLinks();
   renderLinks();
 }
@@ -1428,7 +1395,7 @@ iconDialog.addEventListener("close", () => {
 });
 
 document.addEventListener("click", (event) => {
-  if (!event.target.closest(".tile-menu") && !event.target.closest(".top-menu")) {
+  if (!event.target.closest(".top-menu")) {
     closeAllMenus();
   }
 });
